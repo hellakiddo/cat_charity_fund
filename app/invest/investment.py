@@ -8,45 +8,49 @@ from sqlalchemy.sql.expression import false
 from app.models.charity_project import CharityProject
 from app.models.donation import Donation
 
-async def get_not_invested_objects(
-    model_in: Union[CharityProject, Donation],
+async def get_not_fully_invested_objects(
+    model: Union[CharityProject, Donation],
     session: AsyncSession
 ) -> List[Union[CharityProject, Donation]]:
-    db_objects = await session.execute(select(model_in).where(
-            model_in.fully_invested == false()
-        ).order_by(model_in.create_date))
-    return db_objects.scalars().all()
+    not_fully_invested_objects = await session.execute(select(model).where(
+            model.fully_invested == false()
+        ).order_by(model.create_date))
+    return not_fully_invested_objects.scalars().all()
 
-
-async def close_invested_object(
-    obj_to_close: Union[CharityProject, Donation],
+async def mark_object_as_fully_invested(
+    obj_to_mark: Union[CharityProject, Donation],
 ) -> None:
-    obj_to_close.fully_invested = True
-    obj_to_close.close_date = datetime.now()
-
+    obj_to_mark.fully_invested = True
+    obj_to_mark.close_date = datetime.now()
 
 async def execute_investment_process(
-    object_in: Union[CharityProject, Donation],
+    current_object: Union[CharityProject, Donation],
     session: AsyncSession
 ):
-    db_model = CharityProject if isinstance(object_in, Donation) else Donation
-    not_invested_objects = await get_not_invested_objects(db_model, session)
-    available_amount = object_in.full_amount
+    db_model = CharityProject if isinstance(
+        current_object, Donation
+    ) else Donation
+    not_fully_invested_objects = await get_not_fully_invested_objects(
+        db_model, session
+    )
+    remaining_investment_amount = current_object.full_amount
 
-    for not_invested in not_invested_objects:
-        need_invest = (
-                not_invested.full_amount - not_invested.invested_amount
+    for not_full_invest in not_fully_invested_objects:
+        remaining_invest_needed = (
+                not_full_invest.full_amount - not_full_invest.invested_amount
         )
-        to_invest = min(need_invest, available_amount)
-        not_invested.invested_amount += to_invest
-        object_in.invested_amount += to_invest
-        available_amount -= to_invest
+        investment_to_make = min(
+            remaining_invest_needed, remaining_investment_amount
+        )
+        not_full_invest.invested_amount += investment_to_make
+        current_object.invested_amount += investment_to_make
+        remaining_investment_amount -= investment_to_make
 
-        if not_invested.full_amount == not_invested.invested_amount:
-            await close_invested_object(not_invested)
-        if not available_amount:
-            await close_invested_object(object_in)
+        if not_full_invest.full_amount == not_full_invest.invested_amount:
+            await mark_object_as_fully_invested(not_full_invest)
+        if not remaining_investment_amount:
+            await mark_object_as_fully_invested(current_object)
             break
 
     await session.commit()
-    return object_in
+    return current_object
