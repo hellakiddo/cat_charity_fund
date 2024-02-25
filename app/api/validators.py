@@ -11,7 +11,7 @@ PROJECT_NOT_FOUND_ERROR = 'Проект не найден'
 PROJECT_EXISTS_ERROR = 'Проект с таким названием уже есть.'
 FORBIDDEN_UPDATE_ERROR = 'Закрытый проект нельзя редактировать.'
 INVESTED_RPOJECT_DELETE_ERROR = (
-    'В проект инвестировали, не возможно удалить.'
+    'В проект инвестировали, невозможно удалить.'
 )
 INVALID_INVESTED_AMOUNT_ERROR = (
     'Новая сумма должна быть больше ранее внесенной - {}'
