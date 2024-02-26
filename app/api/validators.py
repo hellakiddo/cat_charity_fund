@@ -94,5 +94,7 @@ async def check_correct_full_amount_for_update(
     if db_project_invested_amount > full_amount_to_update:
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-            detail=INVALID_INVESTED_AMOUNT_ERROR.format(db_project_invested_amount)
+            detail=INVALID_INVESTED_AMOUNT_ERROR.format(
+                db_project_invested_amount
+            )
         )
