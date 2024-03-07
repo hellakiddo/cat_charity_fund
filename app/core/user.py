@@ -32,20 +32,16 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     ) -> None:
         if len(password) < 3:
             raise InvalidPasswordException(
-                reason='Password should be at least 3 characters'
+                reason='Пароль не может быть меньше 3 символов.'
             )
         if user.email in password:
             raise InvalidPasswordException(
-                reason='Password should not contain e-mail'
+                reason='Пароль не может содержать email.'
             )
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
     yield SQLAlchemyUserDatabase(session, User)
-
-
-bearer_transport = BearerTransport(tokenUrl='auth/jwt/login')
-
 
 def get_jwt_strategy() -> JWTStrategy:
     return JWTStrategy(secret=settings.secret, lifetime_seconds=JWT_TOKEN_LIFETIME)
@@ -53,7 +49,7 @@ def get_jwt_strategy() -> JWTStrategy:
 
 auth_backend = AuthenticationBackend(
     name='jwt',
-    transport=bearer_transport,
+    transport=BearerTransport(tokenUrl='auth/jwt/login'),
     get_strategy=get_jwt_strategy
 )
 
