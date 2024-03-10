@@ -42,19 +42,17 @@ async def execute_investment_process(
     )
     remaining_investment_amount = current_object.full_amount
 
-    for not_full_invest in not_fully_invested_objects:
-        remaining_invest_needed = (
-                not_full_invest.full_amount - not_full_invest.invested_amount
-        )
+    for not_full in not_fully_invested_objects:
+        remain_invest = (not_full.full_amount - not_full.invested_amount)
         investment_to_make = min(
-            remaining_invest_needed, remaining_investment_amount
+            remain_invest, remaining_investment_amount
         )
-        not_full_invest.invested_amount += investment_to_make
+        not_full.invested_amount += investment_to_make
         current_object.invested_amount += investment_to_make
         remaining_investment_amount -= investment_to_make
 
-        if not_full_invest.full_amount == not_full_invest.invested_amount:
-            await mark_object_as_fully_invested(not_full_invest)
+        if not_full.full_amount == not_full.invested_amount:
+            await mark_object_as_fully_invested(not_full)
         if not remaining_investment_amount:
             await mark_object_as_fully_invested(current_object)
             break
