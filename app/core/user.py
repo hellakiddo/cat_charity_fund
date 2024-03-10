@@ -43,6 +43,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
     yield SQLAlchemyUserDatabase(session, User)
 
+
 def get_jwt_strategy() -> JWTStrategy:
     return JWTStrategy(secret=settings.secret, lifetime_seconds=JWT_TOKEN_LIFETIME)
 

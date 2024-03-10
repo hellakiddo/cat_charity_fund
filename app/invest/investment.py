@@ -8,20 +8,26 @@ from sqlalchemy.sql.expression import false
 from app.models.charity_project import CharityProject
 from app.models.donation import Donation
 
+
 async def get_not_fully_invested_objects(
     model: Union[CharityProject, Donation],
     session: AsyncSession
 ) -> List[Union[CharityProject, Donation]]:
-    not_fully_invested_objects = await session.execute(select(model).where(
-            model.fully_invested == false()
-        ).order_by(model.create_date))
+    not_fully_invested_objects = await session.execute(
+        select(
+            model
+        ).where(
+            model.fully_invested == false()).order_by(model.create_date)
+    )
     return not_fully_invested_objects.scalars().all()
+
 
 async def mark_object_as_fully_invested(
     obj_to_mark: Union[CharityProject, Donation],
 ) -> None:
     obj_to_mark.fully_invested = True
     obj_to_mark.close_date = datetime.now()
+
 
 async def execute_investment_process(
     current_object: Union[CharityProject, Donation],
@@ -31,7 +37,8 @@ async def execute_investment_process(
         current_object, Donation
     ) else Donation
     not_fully_invested_objects = await get_not_fully_invested_objects(
-        db_model, session
+        db_model,
+        session
     )
     remaining_investment_amount = current_object.full_amount
 
