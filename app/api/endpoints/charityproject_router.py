@@ -9,9 +9,10 @@ from app.api.validators import (
     check_name_duplicate, check_project_was_closed,
     check_project_was_invested
 )
-from app.core.db import get_async_session
+from app.models.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charityproject_crud
+from app.crud.donation import donation_crud
 from app.schemas.charity_project import (
     CharityProjectCreate,
     CharityProjectDB,
@@ -48,14 +49,16 @@ async def create_new_charity_project(
         charity_project.name, session
     )
     new_charity_project = await charityproject_crud.create(
-        charity_project, session
+        charity_project, session, need_commit=False
     )
-    await execute_investment_process(
-        new_charity_project, session
+    session.add_all(
+        execute_investment_process(
+            new_charity_project,
+            await donation_crud.get_not_fully_invested_objects(session))
     )
+    await session.commit()
     await session.refresh(new_charity_project)
     return new_charity_project
-
 
 @router.patch(
     '/{project_id}',
@@ -97,7 +100,7 @@ async def delete_charity_project(
         project_id: int,
         session: AsyncSession = Depends(get_async_session),
 ):
-    charity_project = await check_charity_project_exists(
+    charity_project = await charityproject_crud.get_charity_project(
         project_id, session
     )
     await check_project_was_invested(project_id, session)

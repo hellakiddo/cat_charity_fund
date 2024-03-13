@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import select
+from sqlalchemy import select, not_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
@@ -28,6 +28,16 @@ class CRUDDonation(
             )
         )
         return donations.scalars().all()
+
+    async def get_not_fully_invested_objects(
+        self,
+        session: AsyncSession
+    ):
+        return (
+            await session.execute(
+                select(self.model).where(not_(self.model.fully_invested))
+            )
+        ).scalars().all()
 
 
 donation_crud = CRUDDonation(Donation)

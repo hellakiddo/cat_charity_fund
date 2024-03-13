@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Text
 
-from app.core.db import PreBaseDonationCharity
+from app.models.db import PreBaseDonationCharity
 
 
 class CharityProject(PreBaseDonationCharity):
@@ -12,4 +12,4 @@ class CharityProject(PreBaseDonationCharity):
     )
 
     def __repr__(self) -> str:
-        return f'Фонд - {self.name}'
+        return f'Фонд - {self.name}, {self.description}' + super().__repr__()

@@ -3,8 +3,9 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.db import get_async_session
+from app.models.db import get_async_session
 from app.core.user import current_superuser, current_user
+from app.crud.charity_project import charityproject_crud
 from app.crud.donation import donation_crud
 from app.models.user import User
 from app.schemas.donation import DonationCreate, DonationDB
@@ -60,8 +61,12 @@ async def create_new_donation(
     user: User = Depends(current_user)
 ):
     new_donation = await donation_crud.create(
-        donation, session, user
+        donation, session, user, need_commit=False
     )
-    await execute_investment_process(new_donation, session)
+    sources = await charityproject_crud.get_not_fully_invested_objects(session)
+    if sources:
+        sources = execute_investment_process(new_donation, sources)
+        session.add_all(sources)
+    await session.commit()
     await session.refresh(new_donation)
     return new_donation

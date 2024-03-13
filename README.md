@@ -16,6 +16,12 @@ git clone https://github.com/hellakiddo/cat_charity_fund.git
 
 Cоздать и активировать виртуальное окружение:
 
+* Переходим в рабочую директорию
+
+    ```
+    cd app
+    ```
+
 ```
 python3 -m venv venv
 ```

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Integer, Text
 
-from app.core.db import PreBaseDonationCharity
+from app.models.db import PreBaseDonationCharity
 
 
 class Donation(PreBaseDonationCharity):
@@ -8,3 +8,6 @@ class Donation(PreBaseDonationCharity):
         'user.id', name='fk_donation_user_id_user'
     ))
     comment = Column(Text)
+
+    def __repr__(self) -> str:
+        return f'Фонд - {self.user_id}, {self.comment}' + super().__repr__()
