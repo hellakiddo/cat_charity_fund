@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from fastapi import HTTPException
 from pydantic import PositiveInt
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.charity_project import charityproject_crud
@@ -14,7 +15,7 @@ INVESTED_RPOJECT_DELETE_ERROR = (
     'В проект инвестировали, невозможно удалить.'
 )
 INVALID_INVESTED_AMOUNT_ERROR = (
-    'Новая сумма должна быть больше ранее внесенной - {}'
+    'Новая сумма должна быть больше ранее внесенной'
 )
 
 
@@ -33,51 +34,44 @@ async def check_charity_project_exists(
     return charity_project
 
 
+async def check_project_was_closed(
+    charity_project_id: int,
+    session: AsyncSession
+) -> None:
+    charity_project = await charityproject_crud.get_charity_project(
+        charity_project_id, session
+    )
+    if charity_project.fully_invested is True:
+        raise HTTPException(
+            detail=FORBIDDEN_UPDATE_ERROR,
+            status_code=HTTPStatus.BAD_REQUEST
+        )
+
 async def check_name_duplicate(
     project_name: str,
     session: AsyncSession
 ) -> None:
-    charity_project_id = await (
-        charityproject_crud.get_charity_project_id_by_name(
-            project_name=project_name, session=session
+    charity_project_id = (
+        await session.execute(
+            select(CharityProject.id).where(
+                CharityProject.name == project_name
+            )
         )
-    )
-    if charity_project_id is not None:
+    ).scalars().first()
+    if charity_project_id:
         raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=PROJECT_EXISTS_ERROR
-        )
-
-
-async def check_project_was_closed(
-    project_id: int,
-    session: AsyncSession
-):
-    project_close_date = await (
-        charityproject_crud.get_charity_project_close_date(
-            project_id, session
-        )
-    )
-    if project_close_date:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=FORBIDDEN_UPDATE_ERROR
+            detail=PROJECT_EXISTS_ERROR,
+            status_code=HTTPStatus.BAD_REQUEST
         )
 
 
 async def check_project_was_invested(
-    project_id: int,
-    session: AsyncSession
+    charity_project: CharityProject,
 ):
-    invested_project = await (
-        charityproject_crud.get_charity_project_invested_amount(
-            project_id, session
-        )
-    )
-    if invested_project:
+    if charity_project.invested_amount > 0:
         raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=INVESTED_RPOJECT_DELETE_ERROR
+            detail=INVESTED_RPOJECT_DELETE_ERROR,
+            status_code=HTTPStatus.BAD_REQUEST
         )
 
 
@@ -87,14 +81,14 @@ async def check_correct_full_amount_for_update(
     full_amount_to_update: PositiveInt
 ):
     db_project_invested_amount = await (
-        charityproject_crud.get_charity_project_invested_amount(
+        charityproject_crud.get_charity_project(
             project_id, session
         )
     )
-    if db_project_invested_amount > full_amount_to_update:
+    if full_amount_to_update < db_project_invested_amount.invested_amount:
         raise HTTPException(
-            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-            detail=INVALID_INVESTED_AMOUNT_ERROR.format(
-                db_project_invested_amount
-            )
+            detail=INVALID_INVESTED_AMOUNT_ERROR,
+            status_code=HTTPStatus.BAD_REQUEST
         )
+    if full_amount_to_update == db_project_invested_amount.invested_amount:
+        db_project_invested_amount.fully_invested = True

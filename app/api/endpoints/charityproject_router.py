@@ -84,11 +84,9 @@ async def partially_update_charity_project(
         await check_name_duplicate(
             object_in.name, session
         )
-
-    charity_project = await charityproject_crud.update(
+    return await charityproject_crud.update(
         charity_project, object_in, session
     )
-    return charity_project
 
 
 @router.delete(
@@ -103,10 +101,9 @@ async def delete_charity_project(
     charity_project = await charityproject_crud.get_charity_project(
         project_id, session
     )
-    await check_project_was_invested(project_id, session)
-    charity_project = await (
+    await check_project_was_invested(charity_project)
+    return await (
         charityproject_crud.remove(
             charity_project, session
         )
     )
-    return charity_project
