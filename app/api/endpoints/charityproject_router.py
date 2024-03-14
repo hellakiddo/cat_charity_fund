@@ -60,6 +60,7 @@ async def create_new_charity_project(
     await session.refresh(new_charity_project)
     return new_charity_project
 
+
 @router.patch(
     '/{project_id}',
     response_model=CharityProjectDB,

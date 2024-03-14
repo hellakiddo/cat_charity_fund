@@ -47,6 +47,7 @@ async def check_project_was_closed(
             status_code=HTTPStatus.BAD_REQUEST
         )
 
+
 async def check_name_duplicate(
     project_name: str,
     session: AsyncSession
