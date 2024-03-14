@@ -23,9 +23,8 @@ def execute_investment_process(
         )
         changed.append(source)
         for obj in (target, source):
-            obj.invested_amount = (
-                    (obj.invested_amount or 0) + investing_amount
-            )
+            obj.invested_amount = ((obj.invested_amount or 0
+                                    ) + investing_amount)
             if obj.invested_amount == obj.full_amount:
                 obj.fully_invested = True
                 obj.close_date = datetime.now()
