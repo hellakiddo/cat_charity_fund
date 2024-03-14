@@ -9,7 +9,7 @@ from app.api.validators import (
     check_name_duplicate, check_project_was_closed,
     check_project_was_invested
 )
-from app.models.db import get_async_session
+from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charityproject_crud
 from app.crud.donation import donation_crud

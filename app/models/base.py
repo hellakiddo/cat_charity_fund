@@ -1,10 +1,8 @@
 from datetime import datetime
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, CheckConstraint
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker
 
-from app.core.config import settings
+from app.core.db import Base
 
 REPRESENTATION = (
     'Сумма: {full_amount}\n'
@@ -12,19 +10,6 @@ REPRESENTATION = (
     'Cтатус: {fully_invested}\n'
     'Дата закрытия: {close_date}\n'
 )
-
-
-class PreBase:
-
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
-
-    id = Column(Integer, primary_key=True)
-
-
-Base = declarative_base(cls=PreBase)
-
 
 class PreBaseDonationCharity(Base):
     __abstract__ = True
@@ -46,12 +31,3 @@ class PreBaseDonationCharity(Base):
             fully_invested=self.fully_invested,
             close_date=self.close_date if self.close_date else ' --- '
         )
-
-
-engine = create_async_engine(settings.database_url)
-AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
-
-
-async def get_async_session():
-    async with AsyncSessionLocal() as async_session:
-        yield async_session

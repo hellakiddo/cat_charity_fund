@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from app.models.db import PreBaseDonationCharity
+from app.models.base import PreBaseDonationCharity
 
 
 def execute_investment_process(

@@ -16,7 +16,8 @@ except (NameError, ImportError) as error:
     )
 
 try:
-    from app.models.db import Base, get_async_session  # noqa
+    from app.models.base import Base  # noqa
+    from app.core.db import get_async_session
 except (NameError, ImportError) as error:
     raise AssertionError(
         'При импорте объектов `Base, get_async_session` '

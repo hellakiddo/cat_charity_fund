@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Text
 
-from app.models.db import PreBaseDonationCharity
+from app.models.base import PreBaseDonationCharity
 
 
 class CharityProject(PreBaseDonationCharity):
