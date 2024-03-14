@@ -11,6 +11,7 @@ REPRESENTATION = (
     'Дата закрытия: {close_date}\n'
 )
 
+
 class PreBaseDonationCharity(Base):
     __abstract__ = True
     __table_args__ = (
