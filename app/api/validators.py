@@ -23,7 +23,7 @@ async def check_charity_project_exists(
     project_id: int,
     session: AsyncSession,
 ) -> CharityProject:
-    charity_project = await charityproject_crud.get_charity_project(
+    charity_project = await charityproject_crud.get(
         object_id=project_id, session=session
     )
     if not charity_project:
@@ -38,7 +38,7 @@ async def check_project_was_closed(
     charity_project_id: int,
     session: AsyncSession
 ) -> None:
-    charity_project = await charityproject_crud.get_charity_project(
+    charity_project = await charityproject_crud.get(
         charity_project_id, session
     )
     if charity_project.fully_invested is True:
@@ -82,7 +82,7 @@ async def check_correct_full_amount_for_update(
     full_amount_to_update: PositiveInt
 ):
     db_project_invested_amount = await (
-        charityproject_crud.get_charity_project(
+        charityproject_crud.get(
             project_id, session
         )
     )

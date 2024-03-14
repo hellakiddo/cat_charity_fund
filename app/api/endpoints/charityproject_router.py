@@ -99,7 +99,7 @@ async def delete_charity_project(
         project_id: int,
         session: AsyncSession = Depends(get_async_session),
 ):
-    charity_project = await charityproject_crud.get_charity_project(
+    charity_project = await charityproject_crud.get(
         project_id, session
     )
     await check_project_was_invested(charity_project)

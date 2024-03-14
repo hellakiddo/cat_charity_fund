@@ -19,6 +19,7 @@ Cоздать и активировать виртуальное окружен�
 * Переходим в рабочую директорию
 
     ```
+    cd cat_charity_fund
     cd app
     ```
 
@@ -62,6 +63,16 @@ alembic upgrade head
 ``` bash
 uvicorn app.main:app
 ```
+
+## Документация:
+
+### Redoc
+
+[Redoc](http://127.0.0.1:8000/redoc)
+
+### Swagger
+
+[Swagger](http://127.0.0.1:8000/docs)
 
 Автор: 
 Сосламбеков Амир - [https://github.com/hellakiddo](https://github.com/hellakiddo)

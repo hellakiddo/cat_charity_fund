@@ -7,7 +7,7 @@ from app.core.db import Base
 REPRESENTATION = (
     'Сумма: {full_amount}\n'
     'Дата создания: {create_date}\n'
-    'Cтатус: {fully_invested}\n'
+    'В проект инвестировано: {invested_amount}\n'
     'Дата закрытия: {close_date}\n'
 )
 
@@ -15,9 +15,10 @@ REPRESENTATION = (
 class PreBaseDonationCharity(Base):
     __abstract__ = True
     __table_args__ = (
-        CheckConstraint('invested_amount >= 0'),
+        CheckConstraint(
+            'invested_amount >= 0 and full_amount >= invested_amount'
+        ),
         CheckConstraint('full_amount > 0'),
-        CheckConstraint('full_amount >= invested_amount'),
     )
     full_amount = Column(Integer)
     invested_amount = Column(Integer, default=0)
@@ -29,6 +30,6 @@ class PreBaseDonationCharity(Base):
         return REPRESENTATION.format(
             full_amount=self.full_amount,
             create_date=self.create_date,
-            fully_invested=self.fully_invested,
+            invested_amount=self.invested_amount,
             close_date=self.close_date if self.close_date else ' --- '
         )

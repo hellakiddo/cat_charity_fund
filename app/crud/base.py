@@ -5,7 +5,6 @@ from pydantic import BaseModel
 from sqlalchemy import select, false
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.charity_project import CharityProject
 from app.models.base import Base
 from app.models.user import User
 
@@ -20,16 +19,14 @@ class CRUDBase(
     def __init__(self, model: Type[ModelType]):
         self.model = model
 
-    async def get_charity_project(
+    async def get(
             self, object_id: int, session: AsyncSession
-    ) -> Optional[CharityProject]:
+    ):
         return (
             await session.execute(
-                select(
-                    CharityProject
-                ).where(
-                    CharityProject.id == object_id
-                ))).scalars().first()
+                select(self.model).where(self.model.id == object_id)
+            )
+        ).scalars().first()
 
     async def get_multiple(self, session: AsyncSession) -> List[ModelType]:
         db_objects = await session.execute(select(self.model))
@@ -44,6 +41,7 @@ class CRUDBase(
     ):
         db_object = self.model(**object_in.dict())
         db_object.user_id = user.id if user else None
+        db_object.invested_amount = 0
         session.add(db_object)
         if need_commit:
             await session.commit()
